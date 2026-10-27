@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>DJ PH Gig Manager</title>
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <script src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"></script>
+  <script>
+    /* Preview panes that read like the site, so PH can see a gig before it goes live */
+    (() => {
+      const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
+      const when = (g) => {
+        const [y, m, d] = String(g.date || "").slice(0, 10).split("-").map(Number);
+        if (!y) return "No date";
+        return g.precision === "year" ? `${y}` : g.precision === "month" ? `${MON[m - 1]} ${y}` : `${d} ${MON[m - 1]} ${y}`;
+      };
+
+      CMS.registerPreviewStyle(`
+        @font-face { font-family: "Archivo"; src: url("/assets/fonts/archivo-latin-wdth-normal.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; }
+        @font-face { font-family: "Plex Mono"; src: url("/assets/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+        body { margin: 0; padding: 32px; background: #0c0b0a; color: #fff; font-family: "Archivo", system-ui, sans-serif; }
+        .mono { font-family: "Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+        h1 { margin: 0 0 20px; font-weight: 900; font-stretch: 62%; font-size: 72px; line-height: 0.9; text-transform: uppercase; }
+        ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid rgba(255,255,255,0.18); }
+        li { display: grid; grid-template-columns: 120px 1fr auto; gap: 4px 20px; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.18); }
+        li.off { opacity: 0.3; }
+        .city { font-weight: 800; font-stretch: 75%; font-size: 28px; text-transform: uppercase; }
+        .what { grid-column: 2; margin: 0; color: rgba(255,255,255,0.6); }
+        .tag { color: rgba(255,255,255,0.6); }
+        .tag.next, .tag.rec { color: #ff4f1f; }
+        .note { margin: 0 0 24px; color: rgba(255,255,255,0.5); }
+        .poster { max-width: 420px; }
+        .poster img { display: block; width: 100%; height: auto; }
+        .count { display: flex; justify-content: space-between; max-width: 420px; box-sizing: border-box; margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.6); }
+        .btns { display: flex; gap: 10px; max-width: 420px; margin-top: 14px; }
+        .btns span { flex: 1; padding: 16px; text-align: center; border: 1px solid #fff; }
+        .btns span:first-child { background: #ff4f1f; border-color: #ff4f1f; color: #0c0b0a; }
+        .intro { max-width: 420px; color: rgba(255,255,255,0.7); }
+      `, { raw: true });
+
+      const GuidePreview = createClass({
+        render() {
+          const list = this.props.entry.getIn(["data", "gigs"]);
+          const gigs = list ? list.toJS() : [];
+          const sorted = gigs.slice().sort((a, b) => {
+            const ua = String(a.date) >= today, ub = String(b.date) >= today;
+            if (ua !== ub) return ua ? -1 : 1;
+            return ua ? String(a.date).localeCompare(b.date) : String(b.date).localeCompare(a.date);
+          });
+          return h("div", {},
+            h("h1", {}, "Gigs"),
+            h("p", { className: "note mono" }, "In the order the site shows them. The home page shows the first six."),
+            h("ol", {}, sorted.map((g, i) => {
+              const up = String(g.date) >= today;
+              const tag = up ? (g.tickets ? "Tickets" : "Soon") : g.record ? "Record" : "Played";
+              return h("li", { key: i, className: g.show === false ? "off" : "" },
+                h("span", { className: "mono" }, when(g)),
+                h("span", { className: "city" }, g.city || "City"),
+                h("span", { className: `mono tag ${up ? "next" : g.record ? "rec" : ""}` }, g.show === false ? "Hidden" : tag),
+                h("p", { className: "what" }, [g.event, g.times].filter(Boolean).join(", ")));
+            })));
+        }
+      });
+
+      const NextPreview = createClass({
+        render() {
+          const get = (k) => this.props.entry.getIn(["data", k]);
+          const poster = get("poster");
+          const asset = poster ? this.props.getAsset(poster) : null;
+          if (get("show") === false) return h("p", { className: "note mono" }, "The poster is switched off. The gig list takes the full width.");
+          return h("div", {},
+            h("p", { className: "intro" }, get("intro")),
+            h("div", { className: "poster" }, asset ? h("img", { src: asset.toString(), alt: get("poster_alt") || "" }) : h("p", { className: "note mono" }, "Add a poster")),
+            get("starts") ? h("div", { className: "count mono" }, h("span", {}, get("countdown_label") || "Starts in"), h("span", {}, `${when({ date: get("starts") })}, ${String(get("starts")).slice(11, 16)}`)) : null,
+            h("div", { className: "btns mono" },
+              get("button_text") ? h("span", {}, get("button_text")) : null,
+              get("second_text") && get("second_link") ? h("span", {}, get("second_text")) : null));
+        }
+      });
+
+      CMS.registerPreviewTemplate("guide", GuidePreview);
+      CMS.registerPreviewTemplate("next", NextPreview);
+    })();
+  </script>
+</body>
+</html>
