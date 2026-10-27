@@ -94,13 +94,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .loader__center { align-self: center; justify-self: center; display: grid; justify-items: center; gap: clamp(22px, 4vh, 40px); }
 .loader__count { display: flex; align-items: flex-start; gap: 0.6vw; font-weight: 900; font-stretch: 62%; font-size: min(38vw, 50vh); line-height: 0.78; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .loader__label { font-size: 12px; margin-top: 0.6em; }
-.loader__enter { display: flex; align-items: center; gap: 26px; opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity 0.5s var(--ease), transform 0.7s var(--ease), visibility 0.5s; }
-.loader.is-ready .loader__enter { opacity: 1; visibility: visible; transform: none; }
-.loader__btn { display: inline-flex; align-items: center; gap: 14px; background: var(--ink); color: var(--white); padding: 19px 28px 18px; font-family: var(--f-mono); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; transition: background 0.3s, color 0.3s; }
-.loader__btn svg { width: 14px; height: 14px; fill: currentColor; }
-.loader__btn:hover, .loader__btn:focus-visible { background: var(--white); color: var(--ink); }
-.loader__quiet { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; border-bottom: 1px solid currentColor; padding-bottom: 3px; opacity: 0.7; }
-.loader__quiet:hover { opacity: 1; }
 .loader :focus-visible { outline-color: var(--ink); }
 .loader__bar { height: 2px; background: rgba(10, 10, 10, 0.16); margin: 0 0 14px; }
 .loader__bar span { display: block; height: 100%; width: 0; background: var(--ink); }
@@ -205,7 +198,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ============ A2 Music ============ */
 .music__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: center; }
-.music__sleeve { grid-column: 1 / span 6; position: relative; aspect-ratio: 1; width: min(100%, 600px); }
+.music__sleeve { grid-column: 1 / span 5; position: relative; aspect-ratio: 1; width: min(100%, 600px); }
 .music__disc { position: absolute; top: 3%; left: 3%; width: 94%; will-change: transform; }
 .music__cover { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5); }
 .deck { grid-column: 8 / span 5; }
@@ -315,7 +308,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .eds { overflow: hidden; }
 .eds__rail { overflow: hidden; }
 .eds__track { display: flex; gap: clamp(14px, 1.8vw, 24px); padding: 0 var(--gut); width: max-content; will-change: transform; }
-.ed { flex: none; width: clamp(280px, 30vw, 460px); display: grid; gap: 14px; }
+.ed { flex: none; width: clamp(280px, 30vw, 460px); display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 14px; }
 .ed__img { aspect-ratio: 4 / 5; overflow: hidden; background: #eee; position: relative; }
 .ed__img img { width: 100%; height: 118%; object-fit: cover; will-change: transform; }
 .ed__flag { position: absolute; top: 14px; left: 14px; background: var(--signal); color: var(--ink); padding: 6px 9px 5px; }
@@ -499,7 +492,11 @@ body.is-loading .cursor__tag, body.on-orange .cursor__tag { background: var(--in
   .mixes .sh, .eds .sh { margin-bottom: clamp(24px, 3.4vh, 44px); }
   .mixes .sh__title { font-size: clamp(64px, min(10.4vw, 15vh), 176px); }
   .sleeve, .crate__end { width: min(23vw, 40vh, 340px); }
-  .ed { width: min(30vw, 42vh, 460px); }
+  .ed { width: max(240px, min(30vw, calc(var(--ed-img-h, 52vh) * 0.8), 460px)); }
+  /* PHola header stays one compact row while the rail is pinned, so the cards get the height */
+  .eds .sh__title { grid-column: 1 / span 6; }
+  .eds .sh__aside { grid-column: 7 / span 6; justify-self: end; max-width: 440px; margin-top: 0; }
+  .eds .sh__title--logo img { width: auto; max-width: 100%; height: clamp(96px, 19vh, 230px); }
 }
 .roll__grid { position: relative; }
 .outro__line span { transform-origin: 50% 100%; }

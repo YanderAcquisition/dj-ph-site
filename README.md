@@ -82,17 +82,17 @@ http://localhost:4520/admin/. Saves go straight to the files on your computer in
 
 ## Music on arrival
 
-Mix 275 is cued in the background while the loader counts up, and the page tries to play it
-straight away. Browsers block sound until the visitor clicks or taps, and Mixcloud's player
-stops itself without a real click, so in practice the loader ends on **Enter with sound**. That
-tap opens the site and starts the mix in the same moment. **Enter without sound** opens it
-silently. If a browser still refuses, a tap prompt appears on the player in the nav.
+Mix 275 is cued in the background while the loader counts up, and the site opens on its own as
+soon as the count finishes. Browsers block sound until the visitor clicks, taps or presses a key,
+and Mixcloud's player won't start without one, so the mix starts on the visitor's first click or
+tap anywhere on the page. If a browser still refuses, a tap prompt appears under the player in
+the nav so the visitor can press play on Mixcloud directly.
 
 ## Before this goes live: confirm with PH's team
 
 1. **Photography.** Lifestyle photos are from the Dropbox "PH PR '26" set and press portraits
    from the Pixieset "Edited" set. Confirm usage rights for both.
-2. **"A note from PH"** is written in his voice from his own interviews. He should approve it.
+2. **"A note from PH"** is written in his voice from the bio he supplied. He should approve it.
 3. **"World record"** is how the press reported the 72 hour set with Shimza (December 2019,
    Icon, Soweto). No Guinness certificate was found, so confirm the exact wording PH uses.
 4. **The Shady PHodcast.** PH's bio calls it "once loved", so the site doesn't say whether it is

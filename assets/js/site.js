@@ -356,10 +356,7 @@
       w.events.ended.on(() => this.setPlaying(false));
       w.events.progress.on((pos, dur) => {
         if (dur) this.dur = dur;
-        if (!this.confirmed && this.playing && pos >= 1) {
-          this.confirmed = true; this.started = true;
-          if (typeof this.onConfirmed === "function") this.onConfirmed();
-        }
+        if (!this.confirmed && this.playing && pos >= 1) { this.confirmed = true; this.started = true; }
         const pct = `${Math.min(100, (pos / this.dur) * 100)}%`;
         $("#deckBar").style.width = pct;
         $("#npBar").style.width = pct;
@@ -603,7 +600,7 @@
       v: target, duration: reduced || skipIntro ? 0.05 : 2.1, ease: "power2.inOut", onComplete: resolve,
       onUpdate: () => { num.textContent = String(Math.round(count.v)).padStart(3, "0"); bar.style.width = (count.v / target) * 100 + "%"; }
     }));
-    let revealed = false, ready = false;
+    let revealed = false;
     const reveal = () => {
       if (revealed) return;
       revealed = true;
@@ -623,15 +620,20 @@
     };
     if (skipIntro) Player.suppress = true;
     Player.prime();
-    Player.onConfirmed = () => { if (ready) reveal(); };
-    $("#enterSound").addEventListener("click", () => { Player.start(); reveal(); }, { once: true });
-    $("#enterQuiet").addEventListener("click", () => { Player.hush(); reveal(); }, { once: true });
+    // The site opens as soon as the count finishes. Browsers only allow sound after a click, tap
+    // or key press, so if the mix couldn't start by itself it starts on the visitor's first one.
     Promise.all([assets, counting]).then(() => {
-      ready = true;
-      if (skipIntro || Player.confirmed) { reveal(); return; }
-      $("#loaderStatus").textContent = `Mix ${MIXES[0].n} is cued`;
-      $("#loader").classList.add("is-ready");
-      $("#enterSound").focus({ preventScroll: true });
+      reveal();
+      if (skipIntro) return;
+      const events = ["pointerup", "keydown"];
+      const kick = (e) => {
+        events.forEach((t) => window.removeEventListener(t, kick, true));
+        if (Player.playing || Player.confirmed) return;
+        // the player's own buttons handle themselves
+        if (e.target.closest && e.target.closest("#np, #deckPlay, #nowPlay, .sleeve, .nav__tap")) return;
+        Player.start();
+      };
+      events.forEach((t) => window.addEventListener(t, kick, true));
     });
   })();
 
@@ -804,9 +806,9 @@
   if (reduced) { passWords.forEach((w) => { w.style.opacity = 1; }); }
   else {
     gsap.timeline({ scrollTrigger: { trigger: "#pass", start: "top 100%" } })
-      .fromTo("#pass", { clipPath: "inset(0% 0% 100% 0%)", y: 70, rotate: -3 }, { clipPath: "inset(0% 0% 0% 0%)", y: 0, rotate: -0.8, ease: "expo.out", duration: 0.75 }, 0)
-      .fromTo(".pass__code", { scaleX: 0 }, { scaleX: 1, ease: "expo.out", duration: 0.5 }, 0.35)
-      .to(passWords, { opacity: 1, stagger: { amount: 0.3 }, ease: "none", duration: 0.15 }, 0.1);
+      .fromTo("#pass", { clipPath: "inset(0% 0% 100% 0%)", y: 70, rotate: -3 }, { clipPath: "inset(0% 0% 0% 0%)", y: 0, rotate: -0.8, ease: "expo.out", duration: 0.6 }, 0)
+      .fromTo(".pass__code", { scaleX: 0 }, { scaleX: 1, ease: "expo.out", duration: 0.45 }, 0.2)
+      .to(passWords, { opacity: 1, stagger: { amount: 0.2 }, ease: "none", duration: 0.12 }, 0.05);
   }
 
   // A2: the record slides out of the sleeve, turns at 33 rpm while playing, and scratches with your scroll
@@ -819,7 +821,13 @@
     grooveRot += (Player.playing ? 0.2 * dt : 0) + v * 0.55;
     setGroove(grooveRot % 360);
   });
-  if (!reduced) gsap.fromTo("#musicDisc", { xPercent: 0, rotate: -10 }, { xPercent: 46, rotate: 0, ease: "expo.out", duration: 0.9, scrollTrigger: { trigger: ".music__grid", start: "top 100%" } });
+  // The record comes out as far as the gap allows, never over the deck and its play button
+  const discShift = () => {
+    const disc = $("#musicDisc"), s = $("#musicSleeve").getBoundingClientRect(), d = $("#deck").getBoundingClientRect();
+    const limit = d.left >= s.right - 1 ? d.left - 32 : document.documentElement.clientWidth - 12;
+    return Math.max(0, Math.min(disc.offsetWidth * 0.46, limit - (s.left + disc.offsetLeft + disc.offsetWidth)));
+  };
+  if (!reduced) gsap.fromTo("#musicDisc", { x: 0, rotate: -10 }, { x: discShift, rotate: 0, ease: "expo.out", duration: 0.9, scrollTrigger: { trigger: ".music__grid", start: "top 100%", invalidateOnRefresh: true } });
 
   // A3 and B1: the crate and the editions scroll sideways while the page holds still
   const mm = gsap.matchMedia();
@@ -842,10 +850,21 @@
         }
       }
     });
-    const eds = $("#edsTrack");
+    const eds = $("#edsTrack"), edsPin = $(".eds__pin");
+    // Size the cards to the screen height so photo, city and caption are all visible while pinned
+    const fitEds = () => {
+      for (let pass = 0; pass < 2; pass++) {
+        const cs = getComputedStyle(edsPin), head = $(".sh", edsPin), row = $(".ed__row", eds);
+        const used = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + head.offsetHeight + parseFloat(getComputedStyle(head).marginBottom) + (row ? row.offsetHeight : 90) + 26;
+        edsPin.style.setProperty("--ed-img-h", `${Math.max(180, innerHeight - used)}px`);
+      }
+    };
+    fitEds();
+    ScrollTrigger.addEventListener("refreshInit", fitEds);
     const edist = () => Math.max(0, eds.scrollWidth - innerWidth);
     const edsTween = gsap.to(eds, { x: () => -edist(), ease: "none", scrollTrigger: { trigger: ".eds", start: "top top", end: () => "+=" + edist(), pin: ".eds__pin", scrub: true, invalidateOnRefresh: true, anticipatePin: 1, refreshPriority: 1 } });
     $$(".ed__img img", eds).forEach((img) => gsap.fromTo(img, { xPercent: -7 }, { xPercent: 7, ease: "none", scrollTrigger: { trigger: img.closest(".ed"), containerAnimation: edsTween, start: "left right", end: "right left", scrub: true } }));
+    return () => { ScrollTrigger.removeEventListener("refreshInit", fitEds); edsPin.style.removeProperty("--ed-img-h"); };
   });
 
   if (!reduced) {
@@ -881,8 +900,8 @@
     });
 
     // B3: cards wipe open like a shutter
-    gsap.fromTo(".card__img", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.8, ease: "expo.out", stagger: 0.07, scrollTrigger: { trigger: ".lately__grid", start: "top 100%" } });
-    gsap.fromTo(".card__img img", { scale: 1.3 }, { scale: 1, duration: 0.75, ease: "expo.out", stagger: 0.07, scrollTrigger: { trigger: ".lately__grid", start: "top 100%" } });
+    gsap.fromTo(".card__img", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "expo.out", stagger: 0.05, scrollTrigger: { trigger: ".lately__grid", start: "top 100%" } });
+    gsap.fromTo(".card__img img", { scale: 1.3 }, { scale: 1, duration: 0.6, ease: "expo.out", stagger: 0.05, scrollTrigger: { trigger: ".lately__grid", start: "top 100%" } });
     gsap.from(".card__tag, .card__title", { y: 20, opacity: 0, duration: 0.6, ease: "expo.out", stagger: 0.04, scrollTrigger: { trigger: ".lately__grid", start: "top 100%" } });
 
     // B4: the portraits fire like a camera flash, one after the other
