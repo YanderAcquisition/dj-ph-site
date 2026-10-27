@@ -1,70 +1,70 @@
 {
   "gigs": [
     {
-      "show": true,
-      "date": "2026-12-18",
-      "precision": "day",
-      "city": "East London, SA",
-      "event": "PHola, Police Park Cricket Stadium",
+      "board": "PHola Police Park",
       "times": "14:00 to 02:00",
       "tickets": "https://phola.howler.co.za/PHolaeastlondon",
+      "city": "East London, SA",
+      "date": "2026-12-18",
       "record": false,
-      "board": "PHola Police Park"
+      "event": "PHola, Police Park Cricket Stadium",
+      "show": true,
+      "precision": "day"
     },
     {
-      "show": true,
-      "date": "2026-03-01",
-      "precision": "month",
+      "board": "PHola",
+      "times": "",
+      "tickets": "",
       "city": "Cape Town, SA",
+      "date": "2026-03-01",
+      "record": false,
       "event": "PHola Cape Town",
-      "times": "",
-      "tickets": "",
-      "record": false,
-      "board": "PHola"
+      "show": false,
+      "precision": "month"
     },
     {
-      "show": true,
-      "date": "2023-07-01",
-      "precision": "month",
+      "board": "PHola Durban July",
+      "times": "",
+      "tickets": "",
       "city": "Durban, SA",
+      "date": "2023-07-01",
+      "record": false,
       "event": "PHola Durban July",
-      "times": "",
-      "tickets": "",
-      "record": false,
-      "board": "PHola Durban July"
+      "show": false,
+      "precision": "month"
     },
     {
-      "show": true,
-      "date": "2023-01-01",
-      "precision": "year",
+      "board": "PHola",
+      "times": "",
+      "tickets": "",
       "city": "Bloemfontein, SA",
+      "date": "2023-01-01",
+      "record": false,
       "event": "PHola Bloemfontein",
-      "times": "",
-      "tickets": "",
-      "record": false,
-      "board": "PHola"
+      "show": false,
+      "precision": "year"
     },
     {
-      "show": true,
-      "date": "2019-12-01",
-      "precision": "month",
+      "board": "72 hours b2b",
+      "times": "",
+      "tickets": "",
       "city": "Soweto, SA",
-      "event": "72 hours b2b with Shimza, Icon",
-      "times": "",
-      "tickets": "",
+      "date": "2019-12-01",
       "record": true,
-      "board": "72 hours b2b"
+      "event": "72 hours b2b with Shimza, Icon",
+      "show": false,
+      "precision": "month"
     },
     {
-      "show": true,
-      "date": "2019-03-01",
-      "precision": "month",
-      "city": "Austin, USA",
-      "event": "SXSW",
+      "board": "SXSW",
       "times": "",
       "tickets": "",
+      "city": "Austin, USA",
+      "date": "2019-03-01",
       "record": false,
-      "board": "SXSW"
+      "event": "SXSW",
+      "show": false,
+      "precision": "day"
     }
   ]
 }
