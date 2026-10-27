@@ -584,6 +584,7 @@
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
     lenis.stop();
+    window.phLenis = lenis;
   }
 
   function heroIntro() {
@@ -608,7 +609,8 @@
         .to("#loader", { clipPath: "inset(0% 0% 100% 0%)", duration: reduced ? 0.01 : 1.1, ease: "expo.inOut" })
         .add(heroIntro(), reduced ? 0 : 0.4)
         .add(() => {
-          $("#loader").remove();
+          const loader = $("#loader");
+          if (loader) loader.remove();
           document.body.classList.remove("is-loading");
           if (lenis) lenis.start();
           // Measure in page order so the pinned rails push everything below them down
